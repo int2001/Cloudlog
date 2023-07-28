@@ -210,7 +210,7 @@ class Labels extends CI_Controller {
 		foreach ($preliminaryData as $key => $row) {
 			$qso=$row;
 			$rowData = [
-				'Date/UTC' => $row['time'],
+				'Date/Time (UTC)' => $row['time'],
 				'Band' => $row['band'],
 				'Mode' => $row['mode'],
 				'RST' => $row['rst'],
