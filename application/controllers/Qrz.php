@@ -115,6 +115,8 @@ class Qrz extends CI_Controller {
 
 		$data['station_profiles'] = $this->stations->all_of_user();
 		$data['station_profile'] = $this->stations->stations_with_qrz_api_key();
+		$this->load->model('Stations');
+		$data['callsigns'] = $this->Stations->callsigns_of_user($this->session->userdata('user_id'));
 
 		$this->load->view('interface_assets/header', $data);
 		$this->load->view('qrz/export');
@@ -174,23 +176,41 @@ class Qrz extends CI_Controller {
 		$this->load->view('interface_assets/footer');
 	}
 
-	function download() {
+	public function import_qrz() {
+		$this->load->model('user_model');
+		if(!$this->user_model->authorize(2)) { $this->session->set_flashdata('notice', 'You\'re not allowed to do that!'); redirect('dashboard'); }
+
+		$data['page_title'] = "QRZ QSL Import";
+
+		$this->load->model('logbook_model');
+
+		$customDate = $this->input->post('from');
+		if ($customDate != NULL) {
+			$qrz_last_date = date($customDate);
+		} else {
+			// Query the logbook to determine when the last LoTW confirmation was
+			$qrz_last_date = null;
+		}
+		$this->download($this->session->userdata('user_id'),$qrz_last_date,true);
+	} // end function
+
+	function download($user_id_to_load = null, $lastqrz = null, $show_views = false) {
 		$this->load->model('user_model');
 		$this->load->model('logbook_model');
 
-		$station_ids = $this->logbook_model->get_station_id_with_qrz_api();
 
-		if ($station_ids) {
-			foreach ($station_ids as $station) {
-				$lastqrz = $this->logbook_model->qrz_last_qsl_date($station->station_id);
-				$qrz_api_key = $station->qrzapikey;
-				if($this->mass_download_qsos($station->station_id, $station->station_callsign, $qrz_api_key, $lastqrz, true)) {
-					echo "QSOs have been Downloaded from QRZ.com.";
-					log_message('info', 'QSOs have been downloaded from QRZ.com.');
-				} else{
-					echo "No QSOs found for Download.";
-					log_message('info', 'No QSOs found for Download.');
+		$api_keys = $this->logbook_model->get_qrz_apikeys();
+
+		if ($api_keys) {
+			foreach ($api_keys as $station) {
+				if (($user_id_to_load != null) && ($user_id_to_load != $station->user_id)) {	// Skip User if we're called with a specific user_id
+					continue;
 				}
+				if ($lastqrz == null) {
+					$lastqrz = $this->logbook_model->qrz_last_qsl_date($station->user_id);
+				}
+				$qrz_api_key = $station->qrzapikey;
+				$result=($this->mass_download_qsos($station->station_callsign, $qrz_api_key, $lastqrz, true, $show_views));
 			}
 		} else {
 			echo "No station profiles with a QRZ API Key found.";
@@ -198,8 +218,7 @@ class Qrz extends CI_Controller {
 		}
 	}
 
-	function mass_download_qsos($station_id = null, $call = null,$qrz_api_key = '', $lastqrz = '1900-01-01', $trusted = false) {
-		if ($station_id != 1 ) { return; }
+	function mass_download_qsos($call = null,$qrz_api_key = '', $lastqrz = '1900-01-01', $trusted = false, $show_views = true) {
 		$config['upload_path'] = './uploads/';
 		$file = $config['upload_path'] . 'qrzcom_download_report.adi';
 		if (file_exists($file) && ! is_writable($file)) {
@@ -223,13 +242,13 @@ class Qrz extends CI_Controller {
 		file_put_contents($file, $content);
 		if (strlen(file_get_contents($file, false, null, 0, 100))!=100) {
 			$result = "QRZ downloading failed for  ".$call." either due to it being down or incorrect logins.";
-			return false;
+			return "false";
 		}
 
 		ini_set('memory_limit', '-1');
-		$result = $this->loadFromFile($file, false);
+		$result = $this->loadFromFile($file, $show_views);
 
-		return true;
+		return $result;
 	}
 
 /*
@@ -267,13 +286,11 @@ class Qrz extends CI_Controller {
 		$tableheaders .= "</tr>";
 
 		$table = "";
-		while($record = $this->adif_parser->get_record())
-		{
-			$time_on = date('Y-m-d', strtotime($record['qso_date'])) ." ".date('H:i', strtotime($record['time_on']));
-
-			if (!(isset($record['app_qrzlog_qsldate']))) {
+		while($record = $this->adif_parser->get_record()) {
+			if ((!(isset($record['app_qrzlog_qsldate']))) || (!(isset($record['qso_date'])))) {
 				continue;
 			}
+			$time_on = date('Y-m-d', strtotime($record['qso_date'])) ." ".date('H:i', strtotime($record['time_on']));
 
 			$qsl_date = date('Y-m-d', strtotime($record['app_qrzlog_qsldate']));
 
@@ -325,7 +342,7 @@ class Qrz extends CI_Controller {
 
 		$this->load->model('user_model');
 		if ($this->user_model->authorize(2)) {	// Only Output results if authorized User
-			if(isset($data['qrz_table_headers'])) {
+			if(isset($tableheaders)) {
 				if($display_view == TRUE) {
 					$data['page_title'] = "QRZ ADIF Information";
 					$this->load->view('interface_assets/header', $data);

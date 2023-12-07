@@ -1728,9 +1728,9 @@ class Logbook_model extends CI_Model {
     /*
      * Function returns all the station_id's with QRZ API Key's
      */
-    function get_station_id_with_qrz_api() {
-        $sql = 'select station_id, qrzapikey, station_callsign from station_profile
-            where coalesce(qrzapikey, "") <> ""';
+    function get_qrz_apikeys() {
+        $sql = 'select distinct qrzapikey, station_callsign,user_id from station_profile
+            where coalesce(qrzapikey, "") <> "" order by qrzapikey, station_callsign';
 
         $query = $this->db->query($sql);
 
@@ -2985,11 +2985,11 @@ function lotw_update($datetime, $callsign, $band, $qsl_date, $qsl_status, $state
     return "Updated";
   }
 
-  function qrz_last_qsl_date($station_id) {
+  function qrz_last_qsl_date($user_id) {
 	  $sql="SELECT date_format(MAX(COALESCE(COL_QRZCOM_QSO_DOWNLOAD_DATE, str_to_date('1900-01-01','%Y-%m-%d'))),'%Y-%m-%d') MAXDATE
 		    FROM ".$this->config->item('table_name')." INNER JOIN station_profile ON (".$this->config->item('table_name').".station_id = station_profile.station_id)
-		    WHERE station_profile.station_id=".$station_id." and station_profile.qrzapikey is not null and COL_QRZCOM_QSO_DOWNLOAD_DATE is not null";
-	  $query = $this->db->query($sql);
+		    WHERE station_profile.user_id=? and station_profile.qrzapikey is not null and COL_QRZCOM_QSO_DOWNLOAD_DATE is not null";
+	  $query = $this->db->query($sql,$user_id);
 	  $row = $query->row();
 	  if (isset($row) && ($row->MAXDATE ?? '' != '')) {
 		  return $row->MAXDATE;
