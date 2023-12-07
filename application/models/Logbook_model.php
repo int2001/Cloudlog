@@ -2451,13 +2451,17 @@ function check_if_callsign_worked_in_logbook($callsign, $StationLocationsArray =
 	  COUNT(IF(COL_EQSL_QSL_RCVD="Y",COL_EQSL_QSL_RCVD,null)) as eQSL_Received,
 	  COUNT(IF(COL_LOTW_QSL_SENT="Y",COL_LOTW_QSL_SENT,null)) as LoTW_Sent,
 	  COUNT(IF(COL_LOTW_QSL_RCVD="Y",COL_LOTW_QSL_RCVD,null)) as LoTW_Received,
+	  COUNT(IF(COL_QRZCOM_QSO_UPLOAD_STATUS="Y",COL_QRZCOM_QSO_UPLOAD_STATUS,null)) as QRZ_Sent,
+	  COUNT(IF(COL_QRZCOM_QSO_DOWNLOAD_STATUS="Y",COL_QRZCOM_QSO_DOWNLOAD_STATUS,null)) as QRZ_Received,
 	  COUNT(IF(COL_QSL_SENT="Y" and DATE(COL_QSLSDATE)=DATE(SYSDATE()),COL_QSL_SENT,null)) as QSL_Sent_today,
 	  COUNT(IF(COL_QSL_RCVD="Y" and DATE(COL_QSLRDATE)=DATE(SYSDATE()),COL_QSL_RCVD,null)) as QSL_Received_today,
 	  COUNT(IF(COL_QSL_SENT IN("Q", "R") and DATE(COL_QSLSDATE)=DATE(SYSDATE()) ,COL_QSL_SENT,null)) as QSL_Requested_today,
 	  COUNT(IF(COL_EQSL_QSL_SENT="Y" and DATE(COL_EQSL_QSLSDATE)=DATE(SYSDATE()),COL_EQSL_QSL_SENT,null)) as eQSL_Sent_today,
 	  COUNT(IF(COL_EQSL_QSL_RCVD="Y" and DATE(COL_EQSL_QSLRDATE)=DATE(SYSDATE()),COL_EQSL_QSL_RCVD,null)) as eQSL_Received_today,
 	  COUNT(IF(COL_LOTW_QSL_SENT="Y" and DATE(COL_LOTW_QSLSDATE)=DATE(SYSDATE()),COL_LOTW_QSL_SENT,null)) as LoTW_Sent_today,
-	  COUNT(IF(COL_LOTW_QSL_RCVD="Y" and DATE(COL_LOTW_QSLRDATE)=DATE(SYSDATE()),COL_LOTW_QSL_RCVD,null)) as LoTW_Received_today
+	  COUNT(IF(COL_LOTW_QSL_RCVD="Y" and DATE(COL_LOTW_QSLRDATE)=DATE(SYSDATE()),COL_LOTW_QSL_RCVD,null)) as LoTW_Received_today,
+	  COUNT(IF(COL_QRZCOM_QSO_UPLOAD_STATUS="Y" and DATE(COL_QRZCOM_QSO_UPLOAD_DATE)=DATE(SYSDATE()),COL_QRZCOM_QSO_UPLOAD_STATUS,null)) as QRZ_Sent_today,
+	  COUNT(IF(COL_QRZCOM_QSO_DOWNLOAD_STATUS="Y" and DATE(COL_QRZCOM_QSO_DOWNLOAD_DATE)=DATE(SYSDATE()),COL_QRZCOM_QSO_DOWNLOAD_STATUS,null)) as QRZ_Received_today
 	');
 	$this->db->where_in('station_id', $logbooks_locations_array);
 
@@ -2471,6 +2475,8 @@ function check_if_callsign_worked_in_logbook($callsign, $StationLocationsArray =
 		    $QSLBreakdown['eQSL_Received'] =  $row->eQSL_Received;
 		    $QSLBreakdown['LoTW_Sent'] =  $row->LoTW_Sent;
 		    $QSLBreakdown['LoTW_Received'] =  $row->LoTW_Received;
+		    $QSLBreakdown['QRZ_Sent'] =  $row->QRZ_Sent;
+		    $QSLBreakdown['QRZ_Received'] =  $row->QRZ_Received;
 		    $QSLBreakdown['QSL_Sent_today'] = $row->QSL_Sent_today;
 		    $QSLBreakdown['QSL_Received_today'] =  $row->QSL_Received_today;
 		    $QSLBreakdown['QSL_Requested_today'] =  $row->QSL_Requested_today;
@@ -2478,6 +2484,8 @@ function check_if_callsign_worked_in_logbook($callsign, $StationLocationsArray =
 		    $QSLBreakdown['eQSL_Received_today'] =  $row->eQSL_Received_today;
 		    $QSLBreakdown['LoTW_Sent_today'] =  $row->LoTW_Sent_today;
 		    $QSLBreakdown['LoTW_Received_today'] =  $row->LoTW_Received_today;
+		    $QSLBreakdown['QRZ_Sent_today'] =  $row->QRZ_Sent_today;
+		    $QSLBreakdown['QRZ_Received_today'] =  $row->QRZ_Received_today;
 	    }
 
 	    return $QSLBreakdown;
