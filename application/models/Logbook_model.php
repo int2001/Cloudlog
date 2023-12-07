@@ -424,7 +424,7 @@ class Logbook_model extends CI_Model {
 
     $this->db->where_in($this->config->item('table_name').'.station_id', $logbooks_locations_array);
 
-		if ($band != 'All') {
+		if (strtolower($band) != 'all') {
 			if($band != "SAT") {
 				$this->db->where('COL_PROP_MODE !=', 'SAT');
 				$this->db->where('COL_BAND', $band);
@@ -448,7 +448,7 @@ class Logbook_model extends CI_Model {
 			$this->db->where($sql);
 		}
 
-		if ($mode != 'All' && $mode != '') {
+		if (strtolower($mode) != 'all' && $mode != '') {
 			$this->db->where("(COL_MODE='" . $mode . "' OR COL_SUBMODE='" . $mode ."')");
 		}
 		$this->db->order_by("COL_TIME_ON", "desc");
