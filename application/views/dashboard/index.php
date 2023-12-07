@@ -310,7 +310,7 @@ function echoQrbCalcLink($mygrid, $grid, $vucc) {
 		<?php if((($this->config->item('use_auth') && ($this->session->userdata('user_type') >= 2)) || $this->config->item('use_auth') === false) && ($total_qrz_sent != 0 || $total_qrz_rcvd != 0)) { ?>
 		<table class="table table-striped border-top">
 			<tr class="titles">
-				<td colspan="2"><i class="fas fa-list"></i> <?php echo lang('general_word_qrz'); ?></td>
+				<td colspan="2"><i class="fas fa-list"></i> QRZ.com</td>
 				<td colspan="1"><?php echo lang('general_word_today'); ?></td>
 			</tr>
 
