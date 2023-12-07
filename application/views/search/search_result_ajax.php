@@ -378,7 +378,7 @@ $ci =& get_instance();
                 echo '<td style=\'text-align: center\' class="qrz">';
                 echo '<span ';
                 if ($row->COL_QRZCOM_QSO_UPLOAD_STATUS == "Y") {
-                   echo "title=\"".lang('qrz_short')." ".lang('general_word_sent');
+                   echo "title=\"QRZ ".lang('general_word_sent');
                    if ($row->COL_QRZCOM_QSO_UPLOAD_DATE != null) {
                      $timestamp = strtotime($row->COL_QRZCOM_QSO_UPLOAD_DATE);
                      echo " ".($timestamp != '' ? date($custom_date_format, $timestamp) : '');
@@ -391,7 +391,7 @@ $ci =& get_instance();
 
                 echo '<span ';
                 if ($row->COL_QRZCOM_QSO_DOWNLOAD_STATUS == "Y") {
-                   echo "title=\"".lang('qrz_short')." ".lang('general_word_received');
+                   echo "title=\"QRZ ".lang('general_word_received');
                    if ($row->COL_QRZCOM_QSO_DOWNLOAD_DATE != null) {
                       $timestamp = strtotime($row->COL_QRZCOM_QSO_DOWNLOAD_DATE);
                       echo " ".($timestamp != '' ? date($custom_date_format, $timestamp) : '');
