@@ -4384,7 +4384,7 @@ function lotw_last_qsl_date($user_id) {
       }
     }
 
-    public function loadCallBook($callsign, $use_fullname=false)
+	public function loadCallBook($callsign, $use_fullname=false)
     {
         $callbook = null;
         try {
